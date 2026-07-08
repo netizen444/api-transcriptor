@@ -87,11 +87,20 @@ app.post('/process-url', async (req, res) => {
   const downloadTemplate = path.join(outputDir, 'source.%(ext)s');
 
   try {
-    const cookiesPath = '/etc/secrets/cookies.txt';
-    const cookiesOption = fs.existsSync(cookiesPath) ? { cookies: cookiesPath } : {};
+    const secretsCookiesPath = '/etc/secrets/cookies.txt';
+    let cookiesOption = {};
+    if (fs.existsSync(secretsCookiesPath)) {
+      const workingCookiesPath = path.join(outputDir, 'cookies.txt');
+      fs.copyFileSync(secretsCookiesPath, workingCookiesPath);
+      cookiesOption = { cookies: workingCookiesPath };
+      console.log('Usando cookies copiadas a', workingCookiesPath);
+    } else {
+      console.log('No se encontró /etc/secrets/cookies.txt, se intentará sin cookies.');
+    }
 
     await ytdlp(url, {
       output: downloadTemplate,
+      format: 'bestaudio/best',
       extractAudio: true,
       audioFormat: 'mp3',
       audioQuality: 5,
@@ -99,7 +108,6 @@ app.post('/process-url', async (req, res) => {
       noWarnings: true,
       preferFreeFormats: true,
       addHeader: ['referer:youtube.com', 'user-agent:Mozilla/5.0'],
-      extractorArgs: 'youtube:player_client=android',
       ...cookiesOption
     });
 
