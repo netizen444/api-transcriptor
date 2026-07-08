@@ -100,7 +100,7 @@ app.post('/process-url', async (req, res) => {
 
     await ytdlp(url, {
       output: downloadTemplate,
-      format: 'bestaudio/best',
+      format: '18/bestaudio/best',
       extractAudio: true,
       audioFormat: 'mp3',
       audioQuality: 5,
